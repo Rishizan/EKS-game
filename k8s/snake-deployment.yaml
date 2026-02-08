@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: game-snake
+  namespace: game-platform
+  labels:
+    app: game-snake
+    version: v1
+    managed-by: rishi
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: game-snake
+  template:
+    metadata:
+      labels:
+        app: game-snake
+        version: v1
+    spec:
+      containers:
+      - name: game-snake-container
+        image: potherca/docker-snake
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        
+        # Resource Management
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        
+        # Health Checks
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        # Environment Variables from ConfigMap
+        env:
+        - name: GAME_TITLE
+          valueFrom:
+            configMapKeyRef:
+              name: game-config
+              key: GAME_SNAKE_TITLE
+        - name: ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: game-config
+              key: ENVIRONMENT

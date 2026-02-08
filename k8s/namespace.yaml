@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: game-platform
+  labels:
+    name: game-platform
+    environment: production
+    managed-by: rishi
+    project: eks-game-platform

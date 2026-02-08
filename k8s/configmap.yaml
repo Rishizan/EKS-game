@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: game-config
+  namespace: game-platform
+  labels:
+    app: game-platform
+data:
+  # Game 2048 Configuration
+  GAME_2048_TITLE: "2048 - Classic Puzzle Game"
+  GAME_2048_PORT: "80"
+  
+  # Game Tetris Configuration
+  GAME_TETRIS_TITLE: "Tetris - Block Puzzle"
+  GAME_TETRIS_PORT: "80"
+  
+  # Game Snake Configuration
+  GAME_SNAKE_TITLE: "Snake - Classic Arcade"
+  GAME_SNAKE_PORT: "80"
+  
+  # Platform Configuration
+  PLATFORM_NAME: "EKS Game Platform by Rishi"
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "info"
