@@ -1,13 +1,19 @@
-variable "aws_region" {
-  description = "AWS region for EKS cluster"
+variable "azure_location" {
+  description = "Azure region for AKS cluster"
   type        = string
-  default     = "us-east-1"
+  default     = "eastus"
+}
+
+variable "resource_group_name" {
+  description = "Name of the Azure resource group"
+  type        = string
+  default     = "game-platform-rg"
 }
 
 variable "cluster_name" {
-  description = "Name of the EKS cluster"
+  description = "Name of the AKS cluster"
   type        = string
-  default     = "game-platform-eks"
+  default     = "game-platform-aks"
 }
 
 variable "environment" {
@@ -16,50 +22,56 @@ variable "environment" {
   default     = "production"
 }
 
-variable "cluster_version" {
-  description = "Kubernetes version for EKS cluster"
+variable "kubernetes_version" {
+  description = "Kubernetes version for AKS cluster"
   type        = string
   default     = "1.28"
 }
 
-variable "node_instance_type" {
-  description = "EC2 instance type for worker nodes"
+variable "node_vm_size" {
+  description = "Azure VM size for worker nodes"
   type        = string
-  default     = "t3.medium"
+  default     = "Standard_D2s_v3"
 }
 
-variable "node_desired_size" {
-  description = "Desired number of worker nodes"
+variable "node_count" {
+  description = "Number of worker nodes"
   type        = number
   default     = 2
 }
 
-variable "node_min_size" {
-  description = "Minimum number of worker nodes"
+variable "node_min_count" {
+  description = "Minimum number of worker nodes (for autoscaling)"
   type        = number
   default     = 1
 }
 
-variable "node_max_size" {
-  description = "Maximum number of worker nodes"
+variable "node_max_count" {
+  description = "Maximum number of worker nodes (for autoscaling)"
   type        = number
   default     = 4
 }
 
-variable "vpc_cidr" {
-  description = "CIDR block for VPC"
+variable "vnet_address_space" {
+  description = "Address space for VNet"
+  type        = list(string)
+  default     = ["10.0.0.0/16"]
+}
+
+variable "subnet_address_prefix" {
+  description = "Address prefix for AKS subnet"
+  type        = list(string)
+  default     = ["10.0.1.0/24"]
+}
+
+variable "enable_auto_scaling" {
+  description = "Enable autoscaling for node pool"
+  type        = bool
+  default     = true
+}
+
+variable "network_plugin" {
+  description = "Network plugin for AKS (azure or kubenet)"
   type        = string
-  default     = "10.0.0.0/16"
-}
-
-variable "enable_nat_gateway" {
-  description = "Enable NAT Gateway for private subnets"
-  type        = bool
-  default     = true
-}
-
-variable "single_nat_gateway" {
-  description = "Use a single NAT Gateway for all private subnets"
-  type        = bool
-  default     = true
+  default     = "azure"
 }

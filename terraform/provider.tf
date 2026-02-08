@@ -2,29 +2,28 @@ terraform {
   required_version = ">= 1.0"
   
   required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 3.0"
     }
   }
   
-  backend "s3" {
+  backend "azurerm" {
     # Uncomment and configure for remote state
-    # bucket = "your-terraform-state-bucket"
-    # key    = "eks-game-platform/terraform.tfstate"
-    # region = "us-east-1"
+    # resource_group_name  = "terraform-state-rg"
+    # storage_account_name = "tfstategameplatform"
+    # container_name       = "tfstate"
+    # key                  = "aks-game-platform.tfstate"
   }
 }
 
-provider "aws" {
-  region = var.aws_region
-  
-  default_tags {
-    tags = {
-      Project     = "EKS-Game-Platform"
-      ManagedBy   = "Terraform"
-      Owner       = "Rishi"
-      Environment = var.environment
+provider "azurerm" {
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
     }
   }
+  
+  # Uncomment to specify subscription
+  # subscription_id = "your-subscription-id"
 }

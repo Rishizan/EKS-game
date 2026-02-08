@@ -1,45 +1,78 @@
+output "resource_group_name" {
+  description = "Name of the resource group"
+  value       = azurerm_resource_group.main.name
+}
+
+output "resource_group_location" {
+  description = "Location of the resource group"
+  value       = azurerm_resource_group.main.location
+}
+
 output "cluster_id" {
-  description = "EKS cluster ID"
-  value       = module.eks.cluster_id
+  description = "AKS cluster ID"
+  value       = azurerm_kubernetes_cluster.main.id
 }
 
-output "cluster_endpoint" {
-  description = "Endpoint for EKS control plane"
-  value       = module.eks.cluster_endpoint
+output "cluster_name" {
+  description = "AKS cluster name"
+  value       = azurerm_kubernetes_cluster.main.name
 }
 
-output "cluster_security_group_id" {
-  description = "Security group ID attached to the EKS cluster"
-  value       = module.eks.cluster_security_group_id
+output "cluster_fqdn" {
+  description = "FQDN of the AKS cluster"
+  value       = azurerm_kubernetes_cluster.main.fqdn
 }
 
-output "cluster_iam_role_arn" {
-  description = "IAM role ARN of the EKS cluster"
-  value       = module.eks.cluster_iam_role_arn
-}
-
-output "cluster_certificate_authority_data" {
-  description = "Base64 encoded certificate data required to communicate with the cluster"
-  value       = module.eks.cluster_certificate_authority_data
+output "kube_config" {
+  description = "Kubernetes configuration file"
+  value       = azurerm_kubernetes_cluster.main.kube_config_raw
   sensitive   = true
 }
 
 output "kubectl_config_command" {
-  description = "Command to update kubeconfig"
-  value       = "aws eks update-kubeconfig --region ${var.aws_region} --name ${var.cluster_name}"
+  description = "Command to configure kubectl"
+  value       = "az aks get-credentials --resource-group ${azurerm_resource_group.main.name} --name ${azurerm_kubernetes_cluster.main.name}"
 }
 
-output "vpc_id" {
-  description = "VPC ID"
-  value       = module.vpc.vpc_id
+output "client_certificate" {
+  description = "Client certificate for cluster authentication"
+  value       = azurerm_kubernetes_cluster.main.kube_config[0].client_certificate
+  sensitive   = true
 }
 
-output "private_subnets" {
-  description = "List of private subnet IDs"
-  value       = module.vpc.private_subnets
+output "cluster_ca_certificate" {
+  description = "Cluster CA certificate"
+  value       = azurerm_kubernetes_cluster.main.kube_config[0].cluster_ca_certificate
+  sensitive   = true
 }
 
-output "public_subnets" {
-  description = "List of public subnet IDs"
-  value       = module.vpc.public_subnets
+output "host" {
+  description = "Kubernetes cluster server host"
+  value       = azurerm_kubernetes_cluster.main.kube_config[0].host
+  sensitive   = true
+}
+
+output "vnet_id" {
+  description = "Virtual Network ID"
+  value       = azurerm_virtual_network.main.id
+}
+
+output "subnet_id" {
+  description = "AKS Subnet ID"
+  value       = azurerm_subnet.aks.id
+}
+
+output "log_analytics_workspace_id" {
+  description = "Log Analytics Workspace ID"
+  value       = azurerm_log_analytics_workspace.main.id
+}
+
+output "principal_id" {
+  description = "Principal ID of the AKS managed identity"
+  value       = azurerm_kubernetes_cluster.main.identity[0].principal_id
+}
+
+output "tenant_id" {
+  description = "Tenant ID of the AKS managed identity"
+  value       = azurerm_kubernetes_cluster.main.identity[0].tenant_id
 }

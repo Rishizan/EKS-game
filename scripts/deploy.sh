@@ -45,16 +45,17 @@ check_prerequisites() {
     fi
     print_success "kubectl is installed"
     
-    # Check AWS CLI
-    if ! command -v aws &> /dev/null; then
-        print_error "AWS CLI is not installed. Please install AWS CLI first."
+    # Check Azure CLI
+    if ! command -v az &> /dev/null; then
+        print_error "Azure CLI is not installed. Please install Azure CLI first."
         exit 1
     fi
-    print_success "AWS CLI is installed"
+    print_success "Azure CLI is installed"
     
     # Check cluster connection
     if ! kubectl cluster-info &> /dev/null; then
         print_error "Cannot connect to Kubernetes cluster. Please configure kubectl."
+        print_info "Run: az aks get-credentials --resource-group <rg-name> --name <cluster-name>"
         exit 1
     fi
     print_success "Connected to Kubernetes cluster"
@@ -146,10 +147,10 @@ display_info() {
     
     print_header "Access Your Games"
     
-    # Get LoadBalancer URLs
-    LB_2048=$(kubectl get svc game-2048-svc -n game-platform -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo "pending...")
-    LB_TETRIS=$(kubectl get svc game-tetris-svc -n game-platform -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo "pending...")
-    LB_SNAKE=$(kubectl get svc game-snake-svc -n game-platform -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo "pending...")
+    # Get LoadBalancer URLs (Azure uses IP addresses instead of hostnames)
+    LB_2048=$(kubectl get svc game-2048-svc -n game-platform -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || echo "pending...")
+    LB_TETRIS=$(kubectl get svc game-tetris-svc -n game-platform -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || echo "pending...")
+    LB_SNAKE=$(kubectl get svc game-snake-svc -n game-platform -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || echo "pending...")
     
     echo -e "${GREEN}🎮 2048 Game:${NC}"
     echo -e "   http://$LB_2048"

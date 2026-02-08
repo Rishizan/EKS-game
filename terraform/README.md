@@ -1,16 +1,19 @@
-# Terraform EKS Game Platform
+# Terraform AKS Game Platform
 
-This directory contains Terraform configurations to provision an Amazon EKS cluster for the game platform.
+This directory contains Terraform configurations to provision an Azure Kubernetes Service (AKS) cluster for the game platform.
 
 ## Prerequisites
 
 - Terraform >= 1.0
-- AWS CLI configured with appropriate credentials
-- AWS account with permissions to create EKS, VPC, and IAM resources
+- Azure CLI configured with appropriate credentials
+- Azure subscription with permissions to create AKS, VNet, and resource groups
 
 ## Quick Start
 
 ```bash
+# Login to Azure
+az login
+
 # Initialize Terraform
 terraform init
 
@@ -21,7 +24,7 @@ terraform plan
 terraform apply
 
 # Configure kubectl
-aws eks update-kubeconfig --region us-east-1 --name game-platform-eks
+az aks get-credentials --resource-group game-platform-rg --name game-platform-aks
 ```
 
 ## Configuration
@@ -31,50 +34,60 @@ aws eks update-kubeconfig --region us-east-1 --name game-platform-eks
 You can customize the deployment by creating a `terraform.tfvars` file:
 
 ```hcl
-aws_region         = "us-east-1"
-cluster_name       = "my-game-platform"
-environment        = "production"
-node_instance_type = "t3.medium"
-node_desired_size  = 2
-node_min_size      = 1
-node_max_size      = 4
+azure_location      = "eastus"
+resource_group_name = "my-game-platform-rg"
+cluster_name        = "my-game-platform-aks"
+environment         = "production"
+node_vm_size        = "Standard_D2s_v3"
+node_count          = 2
+node_min_count      = 1
+node_max_count      = 4
 ```
 
 ### Remote State (Optional)
 
-To use S3 backend for state management, uncomment and configure the backend block in `provider.tf`:
+To use Azure Storage backend for state management, uncomment and configure the backend block in `provider.tf`:
 
 ```hcl
-backend "s3" {
-  bucket = "your-terraform-state-bucket"
-  key    = "eks-game-platform/terraform.tfstate"
-  region = "us-east-1"
+backend "azurerm" {
+  resource_group_name  = "terraform-state-rg"
+  storage_account_name = "tfstategameplatform"
+  container_name       = "tfstate"
+  key                  = "aks-game-platform.tfstate"
 }
 ```
 
 ## Resources Created
 
-- **VPC** with public and private subnets across 3 availability zones
-- **EKS Cluster** with managed node group
-- **IAM Roles** for cluster and nodes
-- **Security Groups** for cluster and node communication
-- **NAT Gateway** for private subnet internet access
+- **Resource Group** for organizing all resources
+- **Virtual Network (VNet)** with subnet for AKS
+- **AKS Cluster** with managed node pool and autoscaling
+- **Managed Identity** for cluster authentication
+- **Log Analytics Workspace** for Azure Monitor
+- **Container Insights** for monitoring
 
 ## Outputs
 
 After applying, you'll get:
-- Cluster endpoint
+- Cluster FQDN and ID
 - kubectl configuration command
-- VPC and subnet IDs
-- IAM role ARNs
+- VNet and subnet IDs
+- Managed identity details
 
 ## Cost Estimation
 
-Approximate monthly costs (us-east-1):
-- EKS Cluster: ~$73
-- EC2 Nodes (2x t3.medium): ~$60
-- NAT Gateway: ~$32
-- **Total: ~$165/month**
+Approximate monthly costs (East US):
+- **AKS Control Plane**: Free (managed by Azure)
+- **Worker Nodes** (2x Standard_D2s_v3): ~$140
+- **Load Balancers** (3x Standard): ~$54
+- **Log Analytics**: ~$10
+- **Total**: ~$204/month
+
+### Cost Optimization Tips
+- Use **Azure Spot VMs** for worker nodes (70% savings)
+- Enable **autoscaling** to scale down during low usage
+- Use **Reserved Instances** for 1-3 year commitments
+- Monitor and optimize with **Azure Cost Management**
 
 ## Cleanup
 
@@ -83,4 +96,15 @@ Approximate monthly costs (us-east-1):
 terraform destroy
 ```
 
-**Important:** Make sure to delete all Kubernetes LoadBalancer services before destroying Terraform resources to avoid orphaned AWS resources.
+**Important:** Make sure to delete all Kubernetes LoadBalancer services before destroying Terraform resources to avoid orphaned Azure resources.
+
+## Differences from AWS
+
+| Feature | AWS EKS | Azure AKS |
+|---------|---------|-----------|
+| Control Plane Cost | $73/month | Free |
+| Network | VPC | Virtual Network (VNet) |
+| Load Balancer | NLB/ALB | Azure Load Balancer |
+| Identity | IAM Roles | Managed Identity |
+| Monitoring | CloudWatch | Azure Monitor |
+| CLI Tool | aws, eksctl | az |

@@ -1,9 +1,9 @@
-# 🎮 EKS Multi-Game Platform
+# 🎮 AKS Multi-Game Platform
 
-> **A production-ready Kubernetes platform on Amazon EKS for deploying and managing multiple browser-based games**
+> **A production-ready Kubernetes platform on Azure AKS for deploying and managing multiple browser-based games**
 
 ![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=for-the-badge&logo=kubernetes&logoColor=white)
-![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)
+![Azure](https://img.shields.io/badge/azure-%230072C6.svg?style=for-the-badge&logo=microsoftazure&logoColor=white)
 ![Terraform](https://img.shields.io/badge/terraform-%235835CC.svg?style=for-the-badge&logo=terraform&logoColor=white)
 
 ## 📋 Table of Contents
@@ -25,7 +25,7 @@
 
 ## 🌟 Overview
 
-This project demonstrates a **production-grade Kubernetes deployment** on Amazon EKS, featuring multiple browser-based games with enterprise-level configurations including:
+This project demonstrates a **production-grade Kubernetes deployment** on Azure AKS, featuring multiple browser-based games with enterprise-level configurations including:
 
 - **Multi-game deployment** (2048, Tetris, Snake)
 - **Horizontal Pod Autoscaling** for dynamic resource management
@@ -55,13 +55,13 @@ This project demonstrates a **production-grade Kubernetes deployment** on Amazon
 - ✅ **Health Probes** (liveness and readiness)
 - ✅ **Labels and Selectors** for organization
 
-### AWS Features
-- ✅ **EKS Cluster** with managed node groups
-- ✅ **VPC** with public and private subnets
-- ✅ **Network Load Balancers** for each game
-- ✅ **IAM Roles** with least privilege access
-- ✅ **CloudWatch** integration for metrics and logs
-- ✅ **Auto Scaling Groups** for worker nodes
+### Azure Features
+- ✅ **AKS Cluster** with managed node pools
+- ✅ **Virtual Network (VNet)** with subnets
+- ✅ **Azure Load Balancers** for each game
+- ✅ **Managed Identity** for secure authentication
+- ✅ **Azure Monitor** integration for metrics and logs
+- ✅ **Auto Scaling** for worker nodes
 
 ### DevOps Features
 - ✅ **Terraform** for infrastructure provisioning
@@ -139,41 +139,37 @@ graph TB
 Before you begin, ensure you have the following installed and configured:
 
 ### Required Tools
-- **AWS CLI** (v2.x or later) - [Installation Guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+- **Azure CLI** (v2.x or later) - [Installation Guide](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 - **kubectl** (v1.28 or later) - [Installation Guide](https://kubernetes.io/docs/tasks/tools/)
-- **eksctl** (v0.150 or later) - [Installation Guide](https://eksctl.io/installation/)
 - **Terraform** (v1.0 or later) - [Installation Guide](https://developer.hashicorp.com/terraform/install)
 - **Git** - [Installation Guide](https://git-scm.com/downloads)
 
-### AWS Account Requirements
-- Active AWS account with appropriate permissions
-- IAM user with permissions to create:
-  - EKS clusters
-  - VPC and networking resources
-  - EC2 instances
-  - IAM roles and policies
+### Azure Account Requirements
+- Active Azure subscription with appropriate permissions
+- User with permissions to create:
+  - AKS clusters
+  - Virtual Networks and subnets
+  - Resource groups
+  - Managed identities
   - Load Balancers
-- AWS CLI configured with credentials:
+- Azure CLI configured with credentials:
   ```bash
-  aws configure
+  az login
   ```
 
 ### Verify Installation
 ```bash
-# Check AWS CLI
-aws --version
+# Check Azure CLI
+az --version
 
 # Check kubectl
 kubectl version --client
 
-# Check eksctl
-eksctl version
-
 # Check Terraform
 terraform version
 
-# Verify AWS credentials
-aws sts get-caller-identity
+# Verify Azure login
+az account show
 ```
 
 ## 🚀 Quick Start
@@ -182,39 +178,40 @@ aws sts get-caller-identity
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/eks-game-platform.git
-cd eks-game-platform
+git clone https://github.com/YOUR_USERNAME/aks-game-platform.git
+cd aks-game-platform
 
 # Make scripts executable
 chmod +x scripts/*.sh
 
-# Step 1: Create EKS cluster (takes ~15-20 minutes)
+# Step 1: Create AKS cluster (takes ~10-15 minutes)
 cd scripts
-./setup-eks.sh
+./setup-aks.sh
 
 # Step 2: Deploy the games
 ./deploy.sh
 
 # Step 3: Access your games
-# The deploy script will display the LoadBalancer URLs
+# The deploy script will display the LoadBalancer IP addresses
 ```
 
 ### Option 2: Manual Setup
 
 ```bash
-# 1. Create EKS cluster using eksctl
-eksctl create cluster \
-  --name game-platform-eks \
-  --region us-east-1 \
-  --nodegroup-name game-platform-nodes \
-  --node-type t3.medium \
-  --nodes 2 \
-  --nodes-min 1 \
-  --nodes-max 4 \
-  --managed
+# 1. Create AKS cluster using Azure CLI
+az aks create \
+  --resource-group game-platform-rg \
+  --name game-platform-aks \
+  --location eastus \
+  --node-count 2 \
+  --node-vm-size Standard_D2s_v3 \
+  --enable-managed-identity \
+  --enable-cluster-autoscaler \
+  --min-count 1 \
+  --max-count 4
 
 # 2. Configure kubectl
-aws eks update-kubeconfig --region us-east-1 --name game-platform-eks
+az aks get-credentials --resource-group game-platform-rg --name game-platform-aks
 
 # 3. Install metrics server for HPA
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
@@ -387,24 +384,24 @@ kubectl top pods -n game-platform
 
 ## 💰 Cost Estimation
 
-### Monthly Costs (us-east-1)
+### Monthly Costs (East US)
 
 | Resource | Cost |
 |----------|------|
-| EKS Cluster | $73.00 |
-| EC2 Nodes (2x t3.medium) | $60.74 |
-| Network Load Balancers (3x) | $48.60 |
-| NAT Gateway | $32.40 |
-| Data Transfer (estimated) | $10.00 |
-| **Total** | **~$224.74/month** |
+| AKS Control Plane | **Free** |
+| Worker Nodes (2x Standard_D2s_v3) | $140.16 |
+| Azure Load Balancers (3x Standard) | $54.00 |
+| Log Analytics | $10.00 |
+| Data Transfer (estimated) | $5.00 |
+| **Total** | **~$209/month** |
 
 ### Cost Optimization Tips
 
-1. **Use Spot Instances** for worker nodes (~70% savings)
-2. **Single NAT Gateway** instead of one per AZ
-3. **Fargate** for serverless compute (pay per pod)
-4. **Delete resources** when not in use
-5. **Use t3.small** instances for testing
+1. **Use Spot VMs** for worker nodes (~70% savings)
+2. **Enable autoscaling** to scale down during low usage
+3. **Use Reserved Instances** for 1-3 year commitments
+4. **Monitor costs** with Azure Cost Management
+5. **Delete resources** when not in use
 
 ## 🎨 Customization
 
@@ -439,9 +436,14 @@ cd scripts
 ./cleanup.sh
 ```
 
-### Delete EKS Cluster
+### Delete AKS Cluster
 ```bash
-eksctl delete cluster --name game-platform-eks --region us-east-1
+az aks delete --resource-group game-platform-rg --name game-platform-aks --yes
+```
+
+### Delete Resource Group (removes everything)
+```bash
+az group delete --name game-platform-rg --yes
 ```
 
 ### Destroy Terraform Resources
@@ -474,4 +476,4 @@ If you found this project helpful, please give it a ⭐️!
 
 ---
 
-**Built with ❤️ using Kubernetes, AWS EKS, and Terraform**
+**Built with ❤️ using Kubernetes, Azure AKS, and Terraform**
